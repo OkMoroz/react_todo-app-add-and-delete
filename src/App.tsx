@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { UserWarning } from './UserWarning';
-import { getTodos, USER_ID } from './api/todos';
+import { addTodo, deleteTodo, getTodos, USER_ID } from './api/todos';
 
 import { Header } from './components/Header';
 import { TodoList } from './components/TodoList';
@@ -15,6 +15,10 @@ export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filteredStatus, setFilteredStatus] = useState<Status>(Status.All);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [tempoTodo, setTempoTodo] = useState<Todo | null>(null);
+  const [title, setTitle] = useState('');
+  const [deletedTodo, setDeletedTodo] = useState(NaN);
+  const [isDeleteCompleted, setIsDeleteCompleted] = useState(false);
 
   useEffect(() => {
     getTodos()
@@ -24,6 +28,65 @@ export const App: React.FC = () => {
         setTimeout(() => setErrorMessage(''), 3000);
       });
   }, []);
+
+  const handleAdd = useCallback((newTodo: Todo) => {
+    setTempoTodo(newTodo);
+    let todosLength = 0;
+
+    addTodo(newTodo)
+      .then(todo => {
+        setTodos(currentTodos => [...currentTodos, todo]);
+        todosLength = 1;
+      })
+      .catch(() => {
+        setErrorMessage(ErrorMessage.UnableToAdd);
+      })
+      .finally(() => {
+        if (todosLength === 1) {
+          setTitle('');
+        }
+
+        setTempoTodo(null);
+      });
+  }, []);
+
+  const handleDeleteCompleted = () => {
+    setIsDeleteCompleted(true);
+    const completedTodos = todos.filter(todo => todo.completed);
+
+    Promise.allSettled(
+      completedTodos.map(todo => deleteTodo(todo.id).then(() => todo)),
+    )
+      .then(values => {
+        values.forEach(val => {
+          if (val.status === 'rejected') {
+            setErrorMessage(ErrorMessage.UnableToDelete);
+          } else {
+            setTodos(currentTodos => {
+              const todoId = val.value as Todo;
+
+              return currentTodos.filter(todo => todo.id !== todoId.id);
+            });
+          }
+        });
+      })
+      .finally(() => setIsDeleteCompleted(false));
+  };
+
+  const handleDelete = (todoId: number) => {
+    setDeletedTodo(todoId);
+
+    deleteTodo(todoId)
+      .then(() => {
+        setTodos(currentTodos =>
+          currentTodos.filter(todo => todo.id !== todoId),
+        );
+      })
+      .catch(() => {
+        setErrorMessage(ErrorMessage.UnableToDelete);
+      })
+      .finally(() => setDeletedTodo(NaN));
+  };
 
   const filteredTodos = todos.filter(todo => {
     if (filteredStatus === Status.Active) {
@@ -48,13 +111,33 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header />
-        <TodoList todos={filteredTodos} />
+        <Header
+          handleAdd={handleAdd}
+          setErrorMessage={setErrorMessage}
+          todosLength={todos.length}
+          title={title}
+          onChangeTitle={setTitle}
+          isDeleteCompleted={isDeleteCompleted}
+          deletedTodo={deletedTodo}
+          tempoTodo={tempoTodo}
+        />
+
+        <TodoList
+          todos={filteredTodos}
+          tempoTodo={tempoTodo}
+          deletedTodo={deletedTodo}
+          isDeleteCompleted={isDeleteCompleted}
+          onDelete={handleDelete}
+        />
+
         {todos.length > 0 && (
           <Footer
+            todos={todos}
+            isDeleteCompleted={isDeleteCompleted}
             onFilteredStatus={setFilteredStatus}
             filteredStatus={filteredStatus}
             todosCount={activeTodosCount}
+            onDeleteCompleted={handleDeleteCompleted}
           />
         )}
       </div>

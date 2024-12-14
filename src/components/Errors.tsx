@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import cn from 'classnames';
 
-interface Props {
+type Props = {
   message: string;
   clearError: () => void;
-}
+};
 
-export const Errors: React.FC<Props> = ({ message, clearError }) => {
+export const Errors: React.FC<Props> = props => {
+  const { message, clearError } = props;
+
+  useEffect(() => {
+    const timeOut = setTimeout(clearError, 3000);
+
+    return () => {
+      clearTimeout(timeOut);
+    };
+  }, [message]);
+
   return (
     <div
       data-cy="ErrorNotification"

@@ -4,16 +4,32 @@ import React from 'react';
 import { TodoItem } from '../components/TodoItem';
 import { Todo } from '../types/Todo';
 
-interface Props {
+type Props = {
   todos: Todo[];
-}
-export const TodoList: React.FC<Props> = ({ todos }) => {
+  tempoTodo: Todo | null;
+  deletedTodo: number;
+  isDeleteCompleted: boolean;
+  onDelete: (todoId: number) => void;
+};
+export const TodoList: React.FC<Props> = props => {
+  const { todos, tempoTodo, deletedTodo, isDeleteCompleted, onDelete } = props;
+
   return (
     <section className="todoapp__main" data-cy="TodoList">
       {/* This is a completed todo */}
       {todos.map(todo => (
-        <TodoItem todo={todo} key={todo.id} />
+        <TodoItem
+          todo={todo}
+          key={todo.id}
+          deletedTodo={deletedTodo}
+          isDeleteCompleted={isDeleteCompleted}
+          isTempoTodo={false}
+          onDelete={onDelete}
+        />
       ))}
+      {tempoTodo && (
+        <TodoItem todo={tempoTodo} isTempoTodo={true} onDelete={onDelete} />
+      )}
     </section>
   );
 };
