@@ -21,12 +21,16 @@ export const App: React.FC = () => {
   const [isDeleteCompleted, setIsDeleteCompleted] = useState(false);
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => setErrorMessage(''), 3000);
+
     getTodos()
       .then(setTodos)
       .catch(() => {
         setErrorMessage(ErrorMessage.UnableToLoad);
-        setTimeout(() => setErrorMessage(''), 3000);
+        clearTimeout(timeoutId);
       });
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleAdd = useCallback((newTodo: Todo) => {

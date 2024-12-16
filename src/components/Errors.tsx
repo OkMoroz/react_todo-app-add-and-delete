@@ -33,7 +33,6 @@ export const Errors: React.FC<Props> = props => {
         className="delete"
         onClick={clearError}
       />
-      {/* show only one message at a time */}
       {message}
     </div>
   );
