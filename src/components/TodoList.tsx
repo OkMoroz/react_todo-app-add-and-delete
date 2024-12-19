@@ -7,7 +7,7 @@ import { Todo } from '../types/Todo';
 type Props = {
   todos: Todo[];
   tempoTodo: Todo | null;
-  deletedTodo: number;
+  deletedTodo: number | null;
   isDeleteCompleted: boolean;
   onDelete: (todoId: number) => void;
 };

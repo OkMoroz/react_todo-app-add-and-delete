@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { UserWarning } from './UserWarning';
 import { addTodo, deleteTodo, getTodos, USER_ID } from './api/todos';
 
@@ -17,8 +17,10 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [tempoTodo, setTempoTodo] = useState<Todo | null>(null);
   const [title, setTitle] = useState('');
-  const [deletedTodo, setDeletedTodo] = useState(NaN);
+  const [deletedTodo, setDeletedTodo] = useState<number | null>(null);
   const [isDeleteCompleted, setIsDeleteCompleted] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => setErrorMessage(''), 3000);
@@ -89,7 +91,7 @@ export const App: React.FC = () => {
       .catch(() => {
         setErrorMessage(ErrorMessage.UnableToDelete);
       })
-      .finally(() => setDeletedTodo(NaN));
+      .finally(() => setDeletedTodo(null));
   };
 
   const filteredTodos = todos.filter(todo => {
@@ -124,6 +126,7 @@ export const App: React.FC = () => {
           isDeleteCompleted={isDeleteCompleted}
           deletedTodo={deletedTodo}
           tempoTodo={tempoTodo}
+          inputRef={inputRef}
         />
 
         <TodoList

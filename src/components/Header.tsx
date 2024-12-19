@@ -9,7 +9,7 @@ type Props = {
   title: string;
   onChangeTitle: (value: string) => void;
   isDeleteCompleted: boolean;
-  deletedTodo: number;
+  deletedTodo: number | null;
   tempoTodo: Todo | null;
 };
 
@@ -31,7 +31,7 @@ export const Header: React.FC<Props> = props => {
     if (
       inputRef.current &&
       tempoTodo === null &&
-      Object.is(deletedTodo, NaN) &&
+      Object.is(deletedTodo, null) &&
       isDeleteCompleted === false
     ) {
       inputRef.current.focus();

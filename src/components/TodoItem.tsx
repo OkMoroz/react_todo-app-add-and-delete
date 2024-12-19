@@ -6,7 +6,7 @@ import cn from 'classnames';
 
 type Props = {
   todo: Todo;
-  deletedTodo?: number;
+  deletedTodo?: number | null;
   isDeleteCompleted?: boolean;
   isTempoTodo: boolean;
   onDelete: (todoId: number) => void;
